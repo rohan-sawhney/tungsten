@@ -280,6 +280,8 @@ public:
             writeLogLine("Starting render...");
             Timer timer, checkpointTimer;
             double totalElapsed = 0.0;
+            double totalSaveTime = 0.0;
+            uint32 animFrame = 0;
             while (!integrator.done()) {
                 {
                     std::unique_lock<std::mutex> lock(_statusMutex);
@@ -308,11 +310,32 @@ public:
                     writeLogLine(tfm::format("Saving checkpoint took %s",
                             StringUtils::durationToString(ioTimer.elapsed())));
                 }
+
+                if (animFrame < _scene->rendererSettings().animFrames()) {
+                    float dt = 1.0f/float(_scene->rendererSettings().animFrames());
+                    Vec3f p = _flattenedScene->cam().pos();
+                    Vec3f l = _flattenedScene->cam().lookAt();
+                    p = l + Mat4f::rotXYZ(Vec3f(0.0f, 360.0f*dt, 0.0f))*(p - l);
+
+                    animFrame++;
+                    _flattenedScene->cam().setPos(p);
+
+                    /*if (animFrame > 20)
+                        std::_Exit(0);*/
+
+                    timer.stop();
+                    double t0 = timer.elapsed();
+                    integrator.saveAnimFrame();
+                    timer.stop();
+                    double t1 = timer.elapsed();
+                    totalSaveTime += t1 - t0;
+                }
             }
             timer.stop();
 
+            std::cout << "Total save time " << totalSaveTime << std::endl;
             writeLogLine(tfm::format("Finished render. Render time %s",
-                    StringUtils::durationToString(timer.elapsed())));
+                    StringUtils::durationToString(timer.elapsed() - totalSaveTime)));
 
             integrator.saveOutputs();
             if (_scene->rendererSettings().enableResumeRender())
@@ -340,7 +363,7 @@ public:
     {
         std::unique_lock<std::mutex> lock(_statusMutex);
         RendererStatus copy(_status);
-        return std::move(copy);
+        return copy;
     }
 
     std::mutex &logMutex()
@@ -363,7 +386,7 @@ public:
 
         resolution = Vec2i(res);
 
-        return std::move(ldr);
+        return ldr;
     }
 };
 

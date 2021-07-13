@@ -94,7 +94,7 @@ std::unique_ptr<ZipInputStreambuf> ZipReader::openStreambuf(const ZipEntry &entr
     } catch (const std::runtime_error &) {
         return nullptr;
     }
-    return std::move(result);
+    return result;
 }
 
 }

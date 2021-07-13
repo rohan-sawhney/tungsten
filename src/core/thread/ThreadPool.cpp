@@ -28,7 +28,7 @@ std::shared_ptr<TaskGroup> ThreadPool::acquireTask(uint32 &subTaskId)
     subTaskId = task->startSubTask();
     if (subTaskId == task->numSubTasks() - 1)
         _tasks.pop_front();
-    return std::move(task);
+    return task;
 }
 
 void ThreadPool::runWorker(uint32 threadId)
@@ -112,7 +112,7 @@ std::shared_ptr<TaskGroup> ThreadPool::enqueue(TaskFunc func, int numSubtasks, F
             _taskCond.notify_all();
     }
 
-    return std::move(task);
+    return task;
 }
 
 }

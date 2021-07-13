@@ -26,6 +26,7 @@ class RendererSettings : public JsonSerializable
     bool _useSobol;
     uint32 _spp;
     uint32 _sppStep;
+    uint32 _animFrames;
     std::string _checkpointInterval;
     std::string _timeout;
     std::vector<OutputBufferSettings> _outputs;
@@ -41,6 +42,7 @@ public:
       _useSobol(true),
       _spp(32),
       _sppStep(16),
+      _animFrames(0),
       _checkpointInterval("0"),
       _timeout("0")
     {
@@ -64,6 +66,7 @@ public:
         value.getField("scene_bvh", _useSceneBvh);
         value.getField("spp", _spp);
         value.getField("spp_step", _sppStep);
+        value.getField("anim_frames", _animFrames);
         value.getField("checkpoint_interval", _checkpointInterval);
         value.getField("timeout", _timeout);
 
@@ -187,6 +190,11 @@ public:
     uint32 sppStep() const
     {
         return _sppStep;
+    }
+
+    uint32 animFrames() const
+    {
+        return _animFrames;
     }
 
     std::string checkpointInterval() const

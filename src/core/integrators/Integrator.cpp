@@ -25,16 +25,27 @@ static Path incrementalFilename(const Path &dstFile, const std::string &suffix, 
 {
     Path dstPath = (dstFile.stripExtension() + suffix) + dstFile.extension();
     if (overwrite)
-        return std::move(dstPath);
+        return dstPath;
 
     Path barePath = dstPath.stripExtension();
     Path extension = dstPath.extension();
 
+    int radix = 1;
     int index = 0;
+    for (int idx = 0; !barePath.empty() && std::isdigit(barePath.asString().back()); idx++) {
+        index += radix*(barePath.asString().back() - '0');
+        radix *= 10;
+        auto trimmed = std::string(barePath.asString());
+        trimmed.pop_back();
+        barePath = Path(barePath.getWorkingDirectory(), trimmed);
+    }
+
     while (dstPath.exists())
         dstPath = (barePath + tfm::format("%03d", ++index)) + extension;
 
-    return std::move(dstPath);
+    std::cout << dstPath << std::endl;
+
+    return dstPath;
 }
 
 Integrator::Integrator()
@@ -82,6 +93,14 @@ void Integrator::writeBuffers(const std::string &suffix, bool overwrite)
 void Integrator::saveOutputs()
 {
     writeBuffers("", _scene->rendererSettings().overwriteOutputFiles());
+}
+
+void Integrator::saveAnimFrame()
+{
+    saveOutputs();
+    _currentSpp = 0;
+    advanceSpp();
+    _scene->cam().colorBuffer()->clear();
 }
 
 void Integrator::saveCheckpoint()

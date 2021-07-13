@@ -17,9 +17,8 @@ class Path
     std::string _workingDirectory;
     std::string _path;
 
-    Path(const std::string &workingDirectory, const std::string &path);
-
 public:
+    Path(const std::string &workingDirectory, const std::string &path);
     Path() = default;
     Path(const Path &workingDirectory, const std::string &path);
     explicit Path(const std::string &path);
@@ -38,6 +37,7 @@ public:
     void freezeWorkingDirectory();
     void clearWorkingDirectory();
     void setWorkingDirectory(const Path &dir);
+    const std::string &getWorkingDirectory();
 
     const std::string &asString() const;
 

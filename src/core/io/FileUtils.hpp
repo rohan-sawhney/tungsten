@@ -194,7 +194,7 @@ inline std::string FileUtils::streamRead<std::string>(InputStreamHandle &in)
 {
     std::string s;
     std::getline(*in, s, '\0');
-    return std::move(s);
+    return s;
 }
 
 template<>

@@ -286,7 +286,7 @@ static std::unique_ptr<float[]> loadExr(const Path &path, TexelConversion reques
             texels[i*3 + 1] = texels[i*3 + 2] = texels[i*3];
     }
 
-    return std::move(texels);
+    return texels;
 
     } catch(const std::exception &e) {
         std::cout << "OpenEXR loader failed: " << e.what() << std::endl;
@@ -323,7 +323,7 @@ static std::unique_ptr<float[]> loadPfm(const Path &path, TexelConversion reques
         in->read(reinterpret_cast<char *>(img.get() + (h - y - 1)*w*channels), w*channels*sizeof(float));
 
     if (channels == targetChannels)
-        return std::move(img);
+        return img;
 
     std::unique_ptr<float[]> texels(new float[w*h*targetChannels]);
 
@@ -334,7 +334,7 @@ static std::unique_ptr<float[]> loadPfm(const Path &path, TexelConversion reques
         for (int i = 0; i < w*h; ++i)
             texels[i] = convertToScalar(request, img[i*3], img[i*3 + 1], img[i*3 + 2], 1.0f, false);
 
-    return std::move(texels);
+    return texels;
 }
 
 std::unique_ptr<float[]> loadStbiHdr(const Path &path, TexelConversion request, int &w, int &h)
@@ -361,19 +361,19 @@ std::unique_ptr<float[]> loadStbiHdr(const Path &path, TexelConversion request, 
             texels[i] = convertToScalar(request, img[i*3], img[i*3 + 1], img[i*3 + 2], 1.0f, false);
     }
 
-    return std::move(texels);
+    return texels;
 }
 
 std::unique_ptr<float[]> loadHdr(const Path &path, TexelConversion request, int &w, int &h)
 {
     if (path.testExtension("pfm"))
-        return std::move(loadPfm(path, request, w, h));
+        return loadPfm(path, request, w, h);
 #if OPENEXR_AVAILABLE
     else if (path.testExtension("exr"))
-        return std::move(loadExr(path, request, w, h));
+        return loadExr(path, request, w, h);
 #endif
     else
-        return std::move(loadStbiHdr(path, request, w, h));
+        return loadStbiHdr(path, request, w, h);
 }
 
 typedef std::unique_ptr<uint8[], void(*)(void *)> DeletablePixels;
@@ -476,7 +476,7 @@ DeletablePixels loadJpg(const Path &path, int &w, int &h, int &channels)
         }
     }
 
-    return std::move(result);
+    return result;
 }
 #endif
 
@@ -522,7 +522,7 @@ std::unique_ptr<uint8[]> loadLdr(const Path &path, TexelConversion request, int 
                 int(img[i*4 + 3]), channels == 4);
     }
 
-    return std::move(texels);
+    return texels;
 }
 
 bool savePfm(const Path &path, const float *img, int w, int h, int channels)

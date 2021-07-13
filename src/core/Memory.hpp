@@ -17,7 +17,7 @@ inline std::unique_ptr<T[]> zeroAlloc(size_t size)
 {
     std::unique_ptr<T[]> result(new T[size]);
     std::memset(result.get(), 0, size*sizeof(T));
-    return std::move(result);
+    return result;
 }
 
 template<class T>
@@ -56,7 +56,7 @@ inline aligned_unique_ptr<T> alignedZeroAlloc(size_t size, int alignment)
 {
     auto result = alignedAlloc<T>(size, alignment);
     std::memset(result.get(), 0, size*sizeof(T));
-    return std::move(result);
+    return result;
 }
 
 }

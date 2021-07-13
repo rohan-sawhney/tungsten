@@ -114,6 +114,12 @@ public:
         return Vec<ElementType, 2>(y(), z());
     }
 
+    Vec<ElementType, 3> xzy() const { return Vec<ElementType, 3>(x(), z(), y()); }
+    Vec<ElementType, 3> yzx() const { return Vec<ElementType, 3>(y(), z(), x()); }
+    Vec<ElementType, 3> yxz() const { return Vec<ElementType, 3>(y(), x(), z()); }
+    Vec<ElementType, 3> zxy() const { return Vec<ElementType, 3>(z(), x(), y()); }
+    Vec<ElementType, 3> zyx() const { return Vec<ElementType, 3>(z(), y(), x()); }
+
     ElementType *data()
     {
         return &_v[0];
@@ -675,6 +681,15 @@ bool isinf(const Tungsten::Vec<ElementType, Size> &t)
         if (std::isinf(t[i]))
             return true;
     return false;
+}
+
+template<unsigned Size>
+Tungsten::Vec<float, Size> nextafter(const Tungsten::Vec<float, Size> &from, float to)
+{
+    Tungsten::Vec<float, Size> result;
+    for (unsigned i = 0; i < Size; ++i)
+        result[i] = std::nextafter(from[i], to);
+    return result;
 }
 
 }

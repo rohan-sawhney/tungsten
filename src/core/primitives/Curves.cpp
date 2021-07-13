@@ -13,6 +13,7 @@
 #include "io/JsonObject.hpp"
 #include "io/FileUtils.hpp"
 #include "io/CurveIO.hpp"
+#include "io/MeshIO.hpp"
 #include "io/Scene.hpp"
 
 namespace Tungsten {
@@ -333,6 +334,10 @@ void Curves::buildProxy()
         samples = 1;
     }
 
+    float thicknessScale = 1.0f/_transform.extractScaleVec().min();
+
+    std::cout << "Have " << _curveCount << " curves" << std::endl;
+
     uint32 idx = 0;
     for (uint32 i = 0; i < _curveCount; i += stepSize) {
         uint32 start = 0;
@@ -349,10 +354,13 @@ void Curves::buildProxy()
 
             for (int j = 0; j <= samples; ++j) {
                 float curveT = j*(1.0f/samples);
-                Vec3f tangent = BSpline::quadraticDeriv(p0.xyz(), p1.xyz(), p2.xyz(), curveT).normalized();
+                Vec3f tangent = BSpline::quadraticDeriv(p0.xyz(), p1.xyz(), p2.xyz(), curveT);
+                tangent = (tangent.length() < 1e-8f) ? Vec3f(0.0f, 1.0f, 0.0f) : tangent.normalized();
                 Vec3f normal = BSpline::quadratic(n0, n1, n2, curveT);
+                normal = (normal.length() < 1e-8f) ? MathUtil::randomOrtho(tangent) : normal.normalized();
                 Vec3f binormal = tangent.cross(normal).normalized();
                 Vec4f p = BSpline::quadratic(p0, p1, p2, curveT);
+                p.w() *= thicknessScale;
                 Vec3f v0 = -p.w()*binormal + p.xyz();
                 Vec3f v1 =  p.w()*binormal + p.xyz();
 
@@ -367,7 +375,12 @@ void Curves::buildProxy()
         }
     }
 
+    std::cout << verts.size() << " verts, " << tris.size() << " tris" << std::endl;
+
     _proxy = std::make_shared<TriangleMesh>(verts, tris, _bsdf, "Curves", false, false);
+    _proxy->calcSmoothVertexNormals();
+    _proxy->setSmoothed(true);
+    MeshIO::save("Hair.obj", _proxy->verts(), _proxy->tris());
 }
 
 void Curves::fromJson(JsonPtr value, const Scene &scene)

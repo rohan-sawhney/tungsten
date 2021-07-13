@@ -26,6 +26,7 @@ class TriangleMesh : public Primitive
     bool _smoothed;
     bool _backfaceCulling;
     bool _recomputeNormals;
+    bool _flipNormals;
 
     std::vector<Vertex> _verts;
     std::vector<Vertex> _tfVerts;

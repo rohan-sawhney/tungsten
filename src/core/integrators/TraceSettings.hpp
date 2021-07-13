@@ -35,7 +35,7 @@ struct TraceSettings
         v.AddMember("max_bounces", maxBounces, allocator);
         v.AddMember("enable_consistency_checks", enableConsistencyChecks, allocator);
         v.AddMember("enable_two_sided_shading", enableTwoSidedShading, allocator);
-        return std::move(v);
+        return v;
     }
 };
 

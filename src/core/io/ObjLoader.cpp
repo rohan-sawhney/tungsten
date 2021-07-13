@@ -514,7 +514,7 @@ std::shared_ptr<Primitive> ObjLoader::finalizeMesh()
 
     prim->setEmission(emission);
 
-    return std::move(prim);
+    return prim;
 }
 
 void ObjLoader::loadFile(std::istream &in)

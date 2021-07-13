@@ -14,11 +14,9 @@ TraceBase::TraceBase(TraceableScene *scene, const TraceSettings &settings, uint3
     for (size_t i = 0; i < scene->lights().size(); ++i) {
         scene->lights()[i]->makeSamplable(*_scene, _threadId);
         lightWeights[i] = 1.0f; // TODO: Use light power here
+        _lightMapping.insert(std::make_pair(scene->lights()[i].get(), i));
     }
     _lightSampler.reset(new Distribution1D(std::move(lightWeights)));
-
-    for (const auto &prim : scene->lights())
-        prim->makeSamplable(*_scene, _threadId);
 }
 
 SurfaceScatterEvent TraceBase::makeLocalScatterEvent(IntersectionTemporary &data, IntersectionInfo &info,
@@ -413,9 +411,15 @@ Vec3f TraceBase::volumeSampleDirect(const Primitive &light,
     return result;
 }
 
-const Primitive *TraceBase::chooseLight(PathSampleGenerator &sampler, const Vec3f &p, float &weight)
+const Primitive *TraceBase::chooseLight(PathSampleGenerator &sampler, const Vec3f &/*p*/, float &weight) const
 {
-    if (_scene->lights().empty())
+    float u = sampler.next1D();
+    int lightIdx;
+    _lightSampler->warp(u, lightIdx);
+    weight = 1.0f/_lightSampler->pdf(lightIdx);
+    return _scene->lights()[lightIdx].get();
+
+    /*if (_scene->lights().empty())
         return nullptr;
     if (_scene->lights().size() == 1) {
         weight = 1.0f;
@@ -455,7 +459,7 @@ const Primitive *TraceBase::chooseLight(PathSampleGenerator &sampler, const Vec3
             t -= _lightPdf[i];
         }
     }
-    return nullptr;
+    return nullptr;*/
 }
 
 const Primitive *TraceBase::chooseLightAdjoint(PathSampleGenerator &sampler, float &pdf)
@@ -465,6 +469,16 @@ const Primitive *TraceBase::chooseLightAdjoint(PathSampleGenerator &sampler, flo
     _lightSampler->warp(u, lightIdx);
     pdf = _lightSampler->pdf(lightIdx);
     return _scene->lights()[lightIdx].get();
+}
+
+float TraceBase::lightSelectionPdf(const Primitive *light) const
+{
+    auto iter = _lightMapping.find(light);
+    if (iter == _lightMapping.end()) {
+        std::cout << "Light not in light mapping eek" << std::endl;
+        std::_Exit(-1);
+    }
+    return _lightSampler->pdf(iter->second);
 }
 
 Vec3f TraceBase::volumeEstimateDirect(PathSampleGenerator &sampler,
@@ -517,7 +531,7 @@ bool TraceBase::handleSurface(SurfaceScatterEvent &event, IntersectionTemporary 
                               IntersectionInfo &info, const Medium *&medium,
                               int bounce, bool adjoint, bool enableLightSampling, Ray &ray,
                               Vec3f &throughput, Vec3f &emission, bool &wasSpecular,
-                              Medium::MediumState &state, Vec3f *transmittance)
+                              Medium::MediumState &state, Vec3f *transmittance, bool skipLighting)
 {
     const Bsdf &bsdf = *info.bsdf;
 
@@ -533,7 +547,7 @@ bool TraceBase::handleSurface(SurfaceScatterEvent &event, IntersectionTemporary 
         event.sampledLobe = BsdfLobes::ForwardLobe;
         throughput *= event.weight;
     } else {
-        if (!adjoint) {
+        if (!adjoint && !skipLighting) {
             if (enableLightSampling && bounce < _settings.maxBounces - 1)
                 emission += estimateDirect(event, medium, bounce + 1, ray, transmittance)*throughput;
 

@@ -64,7 +64,7 @@ std::string durationToString(double secs)
     if (seconds) ss << tfm::format("%ds %dms", seconds % 60, uint64(fraction*1000.0f) % 1000);
     else ss << secs << "s";
 
-    return std::move(ss.str());
+    return ss.str();
 }
 
 }

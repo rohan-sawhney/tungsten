@@ -38,7 +38,7 @@ rapidjson::Value toJson(const Vec<ElementType, Size> &value, rapidjson::Document
         for (unsigned i = 0; i < Size; ++i)
             a.PushBack(value[i], allocator);
 
-        return std::move(a);
+        return a;
     }
 }
 

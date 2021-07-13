@@ -240,6 +240,7 @@ bool Cube::sampleDirect(uint32 /*threadIndex*/, const Vec3f &p, PathSampleGenera
     if (cosTheta <= 0.0f)
         return false;
     sample.pdf = rSq/(cosTheta*_area);
+    sample.e = (*_emission)[point.uv];
 
     return true;
 }

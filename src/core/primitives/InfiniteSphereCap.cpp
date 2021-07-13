@@ -135,6 +135,7 @@ bool InfiniteSphereCap::sampleDirect(uint32 /*threadIndex*/, const Vec3f &/*p*/,
     sample.d = _capFrame.toGlobal(dir);
     sample.dist = Ray::infinity();
     sample.pdf = SampleWarp::uniformSphericalCapPdf(_cosCapAngle);
+    sample.e = (*_emission)[Vec2f(0.0f)];
 
     return true;
 }

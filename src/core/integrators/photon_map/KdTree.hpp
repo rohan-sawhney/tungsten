@@ -323,7 +323,7 @@ public:
 
     std::vector<PhotonType> release()
     {
-        return std::move(_nodes);
+        return _nodes;
     }
 };
 

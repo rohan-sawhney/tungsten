@@ -67,7 +67,7 @@ static Vec3f prettifyVector(const Vec3f &p)
 
 rapidjson::Value toJson(rapidjson::Value v, rapidjson::Document::AllocatorType &/*allocator*/)
 {
-    return std::move(v);
+    return v;
 }
 
 rapidjson::Value toJson(const JsonSerializable &o, rapidjson::Document::AllocatorType &allocator)
@@ -79,14 +79,14 @@ rapidjson::Value toJson(const std::string &value, rapidjson::Document::Allocator
 {
     rapidjson::Value result;
     result.SetString(value.c_str(), value.size(), allocator);
-    return std::move(result);
+    return result;
 }
 
 rapidjson::Value toJson(const char *value, rapidjson::Document::AllocatorType &allocator)
 {
     rapidjson::Value result;
     result.SetString(value, allocator);
-    return std::move(result);
+    return result;
 }
 
 rapidjson::Value toJson(const Path &value, rapidjson::Document::AllocatorType &allocator)
@@ -143,7 +143,7 @@ rapidjson::Value toJson(const Mat4f &value, rapidjson::Document::AllocatorType &
     if (rot != 0.0f)
         a.AddMember("rotation", toJson(rot, allocator), allocator);
 
-    return std::move(a);
+    return a;
 }
 
 void addObjectMember(rapidjson::Value &v, const char *name, const JsonSerializable &o,

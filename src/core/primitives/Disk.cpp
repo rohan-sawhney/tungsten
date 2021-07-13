@@ -179,7 +179,8 @@ bool Disk::sampleDirect(uint32 /*threadIndex*/, const Vec3f &p, PathSampleGenera
     if (_n.dot(p - _center) < 0.0f)
         return false;
 
-    Vec2f lQ = SampleWarp::uniformDisk(sampler.next2D()).xy()*_r;
+    Vec2f xi = sampler.next2D();
+    Vec2f lQ = SampleWarp::uniformDisk(xi).xy()*_r;
     Vec3f q = _center + lQ.x()*_frame.bitangent + lQ.y()*_frame.tangent;
     sample.d = q - p;
     float rSq = sample.d.lengthSq();
@@ -189,6 +190,8 @@ bool Disk::sampleDirect(uint32 /*threadIndex*/, const Vec3f &p, PathSampleGenera
         return false;
     float cosTheta = -_n.dot(sample.d);
     sample.pdf = rSq/(cosTheta*_r*_r*PI);
+    Vec2f uv = Vec2f(xi.x() + 0.5f, std::sqrt(xi.y()));
+    sample.e = (*_emission)[uv];
     return true;
 }
 

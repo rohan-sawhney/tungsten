@@ -49,7 +49,9 @@ private:
     RendererSettings _settings;
 
     RTCScene _scene = nullptr;
+    RTCScene _lightScene = nullptr;
     unsigned _userGeomId;
+    unsigned _userLightGeomId;
 
     Box3f _sceneBounds;
 
@@ -94,6 +96,7 @@ public:
                     _infiniteLights.push_back(m);
             }
         }
+        std::sort(_lights.begin(), _lights.end(), [](const std::shared_ptr<Primitive> &a, const std::shared_ptr<Primitive> &b) { return a->isInfinite() < b->isInfinite(); });
         if (lightCount == 0) {
             std::shared_ptr<InfiniteSphere> defaultLight = std::make_shared<InfiniteSphere>();
             defaultLight->setEmission(std::make_shared<ConstantTexture>(1.0f));
@@ -108,6 +111,8 @@ public:
             _sceneBounds.grow(m->bounds());
             _finites.push_back(m.get());
         }
+
+        std::cout << "Scene bounds: " << _sceneBounds << std::endl;
 
         if (_settings.useSceneBvh()) {
             _scene = rtcDeviceNewScene(EmbreeUtil::getDevice(), RTC_SCENE_STATIC | RTC_SCENE_INCOHERENT, RTC_INTERSECT1);
@@ -131,6 +136,28 @@ public:
             });
 
             rtcCommit(_scene);
+
+            _lightScene = rtcDeviceNewScene(EmbreeUtil::getDevice(), RTC_SCENE_STATIC | RTC_SCENE_INCOHERENT, RTC_INTERSECT1);
+            _userLightGeomId = rtcNewUserGeometry(_lightScene, _lights.size() - _infiniteLights.size());
+            rtcSetUserData(_lightScene, _userLightGeomId, this);
+
+            rtcSetBoundsFunction(_lightScene, _userLightGeomId, [](void *ptr, size_t i, RTCBounds &bounds) {
+                bounds = EmbreeUtil::convert(static_cast<TraceableScene *>(ptr)->lights()[i]->bounds());
+            });
+            rtcSetIntersectFunction(_lightScene, _userLightGeomId, [](void *ptr, RTCRay &embreeRay, size_t i) {
+                IntersectionRay &ray = *static_cast<IntersectionRay *>(&embreeRay);
+                if (static_cast<TraceableScene *>(ptr)->lights()[i]->intersect(ray.ray, ray.data)) {
+                    embreeRay.tfar = ray.ray.farT();
+                    embreeRay.geomID = ray.userGeomId;
+                    embreeRay.primID = i;
+                }
+            });
+            rtcSetOccludedFunction(_lightScene, _userLightGeomId, [](void *ptr, RTCRay &embreeRay, size_t i) {
+                if (static_cast<TraceableScene *>(ptr)->lights()[i]->occluded(Ray(EmbreeUtil::convert(embreeRay))))
+                    embreeRay.geomID = 0;
+            });
+
+            rtcCommit(_lightScene);
         }
 
         _integrator.prepareForRender(*this, seed);
@@ -154,9 +181,10 @@ public:
                     m->bsdf(i)->teardownAfterRender();
         }
 
-        if (_scene)
-            rtcDeleteScene(_scene);
-        _scene = nullptr;
+        if (     _scene) rtcDeleteScene(     _scene);
+        if (_lightScene) rtcDeleteScene(_lightScene);
+             _scene = nullptr;
+        _lightScene = nullptr;
     }
 
     float hitDistance(Ray &ray) const
@@ -188,6 +216,39 @@ public:
             return true;
         } else {
             return false;
+        }
+    }
+
+    bool intersectLights(Ray &ray, IntersectionTemporary &data, IntersectionInfo &info) const
+    {
+        info.primitive = nullptr;
+        data.primitive = nullptr;
+
+        if (_settings.useSceneBvh()) {
+            IntersectionRay eRay(EmbreeUtil::convert(ray), data, ray, _userLightGeomId);
+            rtcIntersect(_lightScene, eRay);
+        } else {
+            for (const auto &prim : _lights)
+                prim->intersect(ray, data);
+        }
+
+        if (data.primitive) {
+            info.p = ray.pos() + ray.dir()*ray.farT();
+            info.w = ray.dir();
+            info.epsilon = DefaultEpsilon;
+            data.primitive->intersectionInfo(data, info);
+            return true;
+        } else {
+            for (const std::shared_ptr<Primitive> &p : _infiniteLights)
+                p->intersect(ray, data);
+
+            if (data.primitive) {
+                info.w = ray.dir();
+                data.primitive->intersectionInfo(data, info);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

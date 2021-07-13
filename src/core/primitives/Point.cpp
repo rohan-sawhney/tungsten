@@ -102,6 +102,7 @@ bool Point::sampleDirect(uint32 /*threadIndex*/, const Vec3f &p, PathSampleGener
     sample.dist = std::sqrt(rSq);
     sample.d /= sample.dist;
     sample.pdf = rSq;
+    sample.e = (*_emission)[Vec2f(0.0f)];
     return true;
 }
 

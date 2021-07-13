@@ -14,7 +14,7 @@ std::wstring utf8ToWchar(const char *s, size_t size)
     int wsize = MultiByteToWideChar(CP_UTF8, 0, s, int(size), nullptr, 0);
     std::wstring result(wsize, '\0');
     MultiByteToWideChar(CP_UTF8, 0, s, int(size), &result[0], wsize);
-    return std::move(result);
+    return result;
 }
 
 std::string wcharToUtf8(const wchar_t *s, size_t wsize)
@@ -22,7 +22,7 @@ std::string wcharToUtf8(const wchar_t *s, size_t wsize)
     int size = WideCharToMultiByte(CP_UTF8, 0, s, int(wsize), nullptr, 0, nullptr, nullptr);
     std::string result(size, '\0');
     WideCharToMultiByte(CP_UTF8, 0, s, int(wsize), &result[0], size, nullptr, nullptr);
-    return std::move(result);
+    return result;
 }
 
 std::wstring utf8ToWchar(const std::string &s)

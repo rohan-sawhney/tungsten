@@ -32,6 +32,7 @@ TriangleMesh::TriangleMesh()
 : _smoothed(false),
   _backfaceCulling(false),
   _recomputeNormals(false),
+  _flipNormals(false),
   _bsdfs(1, _defaultBsdf),
   _scene(nullptr)
 {
@@ -43,6 +44,7 @@ TriangleMesh::TriangleMesh(const TriangleMesh &o)
   _smoothed(o._smoothed),
   _backfaceCulling(o._backfaceCulling),
   _recomputeNormals(o._recomputeNormals),
+  _flipNormals(o._flipNormals),
   _verts(o._verts),
   _tris(o._tris),
   _bsdfs(o._bsdfs),
@@ -119,6 +121,7 @@ void TriangleMesh::fromJson(JsonPtr value, const Scene &scene)
     value.getField("smooth", _smoothed);
     value.getField("backface_culling", _backfaceCulling);
     value.getField("recompute_normals", _recomputeNormals);
+    value.getField("flip_normals", _flipNormals);
 
     if (auto bsdf = value["bsdf"]) {
         _bsdfs.clear();
@@ -136,7 +139,8 @@ rapidjson::Value TriangleMesh::toJson(Allocator &allocator) const
         "type", "mesh",
         "smooth", _smoothed,
         "backface_culling", _backfaceCulling,
-        "recompute_normals", _recomputeNormals
+        "recompute_normals", _recomputeNormals,
+        "flip_normals", _flipNormals
     };
     if (_path)
         result.add("file", *_path);
@@ -158,6 +162,12 @@ void TriangleMesh::loadResources()
         DBG("Unable to load triangle mesh at %s", *_path);
     if (_recomputeNormals && _smoothed)
         calcSmoothVertexNormals();
+    if (_flipNormals) {
+        for (auto &v : _verts)
+            v.normal() = -v.normal();
+        for (auto &t : _tris)
+            std::swap(t.vs[0], t.vs[2]);
+    }
 }
 
 void TriangleMesh::saveResources()
@@ -460,6 +470,7 @@ bool TriangleMesh::sampleDirect(uint32 /*threadIndex*/, const Vec3f &p,
     if (cosTheta <= 0.0f)
         return false;
     sample.pdf = rSq/(cosTheta*_totalArea);
+    sample.e = (*_emission)[point.uv];
 
     return true;
 }

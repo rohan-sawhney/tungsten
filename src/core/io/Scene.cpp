@@ -121,7 +121,7 @@ std::shared_ptr<Bsdf> Scene::fetchBsdf(JsonPtr value) const
 {
     using namespace std::placeholders;
     auto result = fetchObject(_bsdfs, *this, value);
-    return std::move(result);
+    return result;
 }
 
 std::shared_ptr<Texture> Scene::fetchTexture(JsonPtr value, TexelConversion conversion) const
@@ -161,7 +161,7 @@ PathPtr Scene::fetchResource(const std::string &path) const
 
         _resources.insert(std::make_pair(key, resource));
 
-        return std::move(resource);
+        return resource;
     } else {
         return iter->second;
     }

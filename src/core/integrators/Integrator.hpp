@@ -40,6 +40,7 @@ public:
     virtual void abortRender() = 0;
 
     virtual void saveOutputs();
+    virtual void saveAnimFrame();
     void saveCheckpoint();
 
     void saveRenderResumeData(Scene &scene);

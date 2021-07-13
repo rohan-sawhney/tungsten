@@ -174,6 +174,7 @@ bool Skydome::sampleDirect(uint32 /*threadIndex*/, const Vec3f &/*p*/, PathSampl
     sample.d = uvToDirection(uv, sinTheta);
     sample.pdf = INV_PI*INV_TWO_PI*_sky->pdf(MAP_SPHERICAL, uv)/sinTheta;
     sample.dist = Ray::infinity();
+    sample.e = (*_emission)[uv];
     return sample.pdf != 0.0f;
 }
 

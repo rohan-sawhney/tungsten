@@ -14,9 +14,9 @@ T min(const T &a, const T &b)
 }
 
 template<typename T, typename... Ts>
-T min(const T &a, const T &b, const Ts &... ts)
+T min(const T &a, const T &b, const T &c, const Ts &... ts)
 {
-    return min(min(a, b), ts...);
+    return min(min(a, b), c, ts...);
 }
 
 template<typename T>
@@ -26,9 +26,9 @@ T max(const T &a, const T &b)
 }
 
 template<typename T, typename... Ts>
-T max(const T &a, const T &b, const Ts &... ts)
+T max(const T &a, const T &b, const T &c, const Ts &... ts)
 {
-    return max(max(a, b), ts...);
+    return max(max(a, b), c, ts...);
 }
 
 template<typename ElementType, unsigned Size>
@@ -153,6 +153,15 @@ public:
     static float triangleArea(const Vec3f &a, const Vec3f &b, const Vec3f &c)
     {
         return (b - a).cross(c - a).length()*0.5f;
+    }
+
+    static Vec3f randomOrtho(Vec3f n)
+    {
+        // [Duff et al. 17] Building An Orthonormal Basis, Revisited. JCGT. 2017.
+        float sign = copysignf(1.0f, n.z());
+        const float a = -1.0f/(sign + n.z());
+        const float b = n.x()*n.y()*a;
+        return Vec3f(1.0f + sign*n.x()*n.x()*a, sign*b, -sign*n.x());
     }
 };
 

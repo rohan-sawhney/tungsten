@@ -1,6 +1,9 @@
 #include "Version.hpp"
 #include "Shared.hpp"
 
+#include "sampling/SampleWarp.hpp"
+#include "integrators/restir/Restir.hpp"
+
 using namespace Tungsten;
 
 int main(int argc, const char *argv[])

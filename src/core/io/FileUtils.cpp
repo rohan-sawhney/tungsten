@@ -282,7 +282,7 @@ OutputStreamHandle FileUtils::openFileOutputStream(const Path &p)
     _metaData.insert(std::make_pair(out.get(), StreamMetadata()));
 #endif
 
-    return std::move(out);
+    return out;
 }
 
 std::shared_ptr<ZipReader> FileUtils::openArchive(const Path &p)
@@ -300,7 +300,7 @@ std::shared_ptr<ZipReader> FileUtils::openArchive(const Path &p)
     }
 
     _archives.insert(std::make_pair(key, archive));
-    return std::move(archive);
+    return archive;
 }
 
 bool FileUtils::recursiveArchiveFind(const Path &p, std::shared_ptr<ZipReader> &archive,
@@ -413,12 +413,12 @@ Path FileUtils::getDataPath()
 #if _WIN32
     Path execPath = getExecutablePath().parent()/"data";
     if (execPath.exists())
-        return std::move(execPath);
+        return execPath;
     return Path(INSTALL_PREFIX)/"data";
 #else
     Path execPath = getExecutablePath().parent()/"share/tungsten";
     if (execPath.exists())
-        return std::move(execPath);
+        return execPath;
     return Path(INSTALL_PREFIX)/"share/tungsten";
 #endif
 }
@@ -480,7 +480,7 @@ std::string FileUtils::loadText(const Path &path)
         text[i] = head[sizeof(head) - offset + i];
     in->read(&text[offset], size);
 
-    return std::move(text);
+    return text;
 }
 
 bool FileUtils::writeJson(const rapidjson::Document &document, const Path &p)
@@ -571,7 +571,7 @@ InputStreamHandle FileUtils::openInputStream(const Path &p)
         if (!in->good())
             return nullptr;
 #endif
-        return std::move(in);
+        return in;
     }
 
     std::shared_ptr<ZipReader> archive;
@@ -585,7 +585,7 @@ InputStreamHandle FileUtils::openInputStream(const Path &p)
                 [](std::istream *stream){ finalizeStream(stream); });
         _metaData.insert(std::make_pair(in.get(), StreamMetadata(std::move(streambuf), std::move(archive))));
 
-        return std::move(in);
+        return in;
     }
 
     return nullptr;
@@ -608,7 +608,7 @@ OutputStreamHandle FileUtils::openOutputStream(const Path &p)
         iter->second.targetPath = p;
     }
 
-    return std::move(out);
+    return out;
 }
 
 std::shared_ptr<OpenDir> FileUtils::openDirectory(const Path &p)

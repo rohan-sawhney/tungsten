@@ -62,7 +62,7 @@ std::vector<std::string> CliParser::retrieveUtf8Args(int argc, const char *argv[
         result.emplace_back(argv[i]);
 #endif
 
-    return std::move(result);
+    return result;
 }
 
 void CliParser::printHelpText(int maxWidth) const

@@ -35,7 +35,7 @@ struct MultiplexedMltSettings : public TraceSettings
         v.AddMember("initial_sample_pool", initialSamplePool, allocator);
         v.AddMember("image_pyramid", imagePyramid, allocator);
         v.AddMember("large_step_probability", largeStepProbability, allocator);
-        return std::move(v);
+        return v;
     }
 };
 

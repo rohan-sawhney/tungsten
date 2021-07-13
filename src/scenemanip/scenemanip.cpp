@@ -52,7 +52,7 @@ static void zipResources(Scene *scene, CliParser &parser)
             while (remappedPaths.count(result))
                 result = p.baseName() + tfm::format("%03d", index++) + p.extension();
         remappedPaths.insert(result);
-        return std::move(result);
+        return result;
     };
 
     try {

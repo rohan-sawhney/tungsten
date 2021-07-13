@@ -189,6 +189,7 @@ bool Sphere::sampleDirect(uint32 /*threadIndex*/, const Vec3f &p, PathSampleGene
     TangentFrame frame(L);
     sample.d = frame.toGlobal(sample.d);
     sample.pdf = SampleWarp::uniformSphericalCapPdf(cosTheta);
+    sample.e = (*_emission)[Vec2f(0.0f)];
 
     return true;
 }

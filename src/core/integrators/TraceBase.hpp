@@ -41,6 +41,7 @@ protected:
     std::vector<float> _lightPdf;
     // For sampling light sources in adjoint light tracing
     std::unique_ptr<Distribution1D> _lightSampler;
+    std::unordered_map<const Primitive *, uint32> _lightMapping;
 
     TraceBase(TraceableScene *scene, const TraceSettings &settings, uint32 threadId);
 
@@ -126,8 +127,9 @@ protected:
                         int bounce,
                         const Ray &parentRay);
 
-    const Primitive *chooseLight(PathSampleGenerator &sampler, const Vec3f &p, float &weight);
+    const Primitive *chooseLight(PathSampleGenerator &sampler, const Vec3f &p, float &weight) const;
     const Primitive *chooseLightAdjoint(PathSampleGenerator &sampler, float &pdf);
+    float lightSelectionPdf(const Primitive *light) const;
 
     Vec3f volumeEstimateDirect(PathSampleGenerator &sampler,
                         MediumSample &mediumSample,
@@ -170,7 +172,7 @@ public:
                IntersectionInfo &info, const Medium *&medium,
                int bounce, bool adjoint, bool enableLightSampling, Ray &ray,
                Vec3f &throughput, Vec3f &emission, bool &wasSpecular,
-               Medium::MediumState &state, Vec3f *transmittance = nullptr);
+               Medium::MediumState &state, Vec3f *transmittance = nullptr, bool skipLighting = false);
 
     void handleInfiniteLights(IntersectionTemporary &data,
             IntersectionInfo &info, bool enableLightSampling, Ray &ray,

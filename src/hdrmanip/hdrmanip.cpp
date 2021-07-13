@@ -132,9 +132,9 @@ std::unique_ptr<float[]> mseMap(int w, int h, std::unique_ptr<float[]> imgA, std
     Vec3f *a = reinterpret_cast<Vec3f *>(imgA.get());
     Vec3f *b = reinterpret_cast<Vec3f *>(imgB.get());
 
-    std::cout << maxX << " " << maxY << " " << maxMse << " " << a[maxX + maxY*w] << " " << b[maxX + maxY*w] << std::endl;
+    //std::cout << maxX << " " << maxY << " " << maxMse << " " << a[maxX + maxY*w] << " " << b[maxX + maxY*w] << std::endl;
 
-    return std::move(result);
+    return result;
 }
 
 std::unique_ptr<float[]> rmseMap(int w, int h, std::unique_ptr<float[]> imgA, std::unique_ptr<float[]> imgB)
@@ -148,7 +148,7 @@ std::unique_ptr<float[]> rmseMap(int w, int h, std::unique_ptr<float[]> imgA, st
         result[i] = rmse/3.0f;
     }
 
-    return std::move(result);
+    return result;
 }
 
 Vec3f colorRamp(float t)
@@ -195,7 +195,7 @@ std::unique_ptr<float[]> heatMap(const float *in, int w, int h, int percentile)
     for (int i = 0; i < w*h; ++i)
         reinterpret_cast<Vec3f *>(img.get())[i] = colorRamp(clamp((in[i] - minPixel)/(maxPixel - minPixel), 0.0f, 1.0f));
 
-    return std::move(img);
+    return img;
 }
 
 int main(int argc, const char *argv[])
@@ -278,7 +278,7 @@ int main(int argc, const char *argv[])
     for (const std::string &operand : parser.operands())
         hdrConvert = hdrConvert && Path(operand).testExtension("png");
 
-    if (hdrConvert) {
+    if (hdrConvert && false) {
         bool gammaCorrect = !parser.isPresent(OPT_TONEMAP) || parser.param(OPT_TONEMAP) != "linear";
         for (const std::string &operand : parser.operands()) {
             int w, h;

@@ -101,6 +101,16 @@ public:
         _sampleCount = zeroAlloc<uint32>(numPixels);
     }
 
+    void clear()
+    {
+        size_t numPixels = _res.product();
+
+        if (_bufferA ) std::memset(_bufferA    .get(), 0, numPixels*sizeof(_bufferA    [0]));
+        if (_bufferB ) std::memset(_bufferB    .get(), 0, numPixels*sizeof(_bufferB    [0]));
+        if (_variance) std::memset(_variance   .get(), 0, numPixels*sizeof(_variance   [0]));
+                       std::memset(_sampleCount.get(), 0, numPixels*sizeof(_sampleCount[0]));
+    }
+
     void addSample(Vec2u pixel, T c)
     {
         if (std::isnan(c) || std::isinf(c))

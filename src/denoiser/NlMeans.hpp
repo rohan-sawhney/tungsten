@@ -153,7 +153,7 @@ Pixmap<Texel> nlMeans(const Pixmap<Texel> &image, const Pixmap<Texel> &guide, co
     if (printProgress)
         printProgressBar(tiles.size(), tiles.size());
 
-    return std::move(result);
+    return result;
 }
 
 // This class gathers up 1-channel images and denoises them 4 of them

@@ -136,7 +136,7 @@ Pixmap3f collaborativeRegression(const Pixmap3f &image, const Pixmap3f &guide,
 
     printProgressBar(tiles.size(), tiles.size());
 
-    return std::move(result);
+    return result;
 }
 
 }

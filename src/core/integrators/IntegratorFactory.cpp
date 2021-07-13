@@ -8,11 +8,13 @@
 #include "kelemen_mlt/KelemenMltIntegrator.hpp"
 #include "path_tracer/PathTraceIntegrator.hpp"
 #include "photon_map/PhotonMapIntegrator.hpp"
+#include "restir/RestirIntegrator.hpp"
 
 namespace Tungsten {
 
 DEFINE_STRINGABLE_ENUM(IntegratorFactory, "integrator", ({
     {"path_tracer", std::make_shared<PathTraceIntegrator>},
+    {"restir", std::make_shared<RestirIntegrator>},
     {"light_tracer", std::make_shared<LightTraceIntegrator>},
     {"photon_map", std::make_shared<PhotonMapIntegrator>},
     {"progressive_photon_map", std::make_shared<ProgressivePhotonMapIntegrator>},

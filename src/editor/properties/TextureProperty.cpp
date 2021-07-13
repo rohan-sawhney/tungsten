@@ -85,7 +85,7 @@ std::vector<std::string> TextureProperty::typeList()
     result.push_back("Blade");
     result.push_back("IES");
 
-    return std::move(result);
+    return result;
 }
 
 void TextureProperty::buildTexturePage()

@@ -337,7 +337,7 @@ struct FiberAttribute
         // Copy-extend
         for (size_t i = size_t(elementsPresent); i < size_t(elementsRequired); ++i)
             result[i] = result[size_t(elementsPresent - 1)];
-        return std::move(result);
+        return result;
     }
 };
 static bool loadFiber(const Path &path, CurveData &data)

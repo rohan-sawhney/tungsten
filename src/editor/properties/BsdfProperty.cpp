@@ -123,7 +123,7 @@ std::vector<std::string> BsdfProperty::typeList() const
     for (int i = 0; i < BSDF_TYPE_COUNT; ++i)
         result.emplace_back(typeToString(static_cast<BsdfType>(i)));
 
-    return std::move(result);
+    return result;
 }
 
 bool BsdfProperty::hasAlbedo(BsdfType type) const

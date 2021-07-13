@@ -182,6 +182,7 @@ bool Quad::sampleDirect(uint32 /*threadIndex*/, const Vec3f &p, PathSampleGenera
     sample.d /= sample.dist;
     float cosTheta = -_frame.normal.dot(sample.d);
     sample.pdf = rSq/(cosTheta*_area);
+    sample.e = (*_emission)[xi];
 
     return true;
 }

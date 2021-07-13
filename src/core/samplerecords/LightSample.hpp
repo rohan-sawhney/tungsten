@@ -13,6 +13,7 @@ struct LightSample
     float dist;
     float pdf;
     const Medium *medium;
+    Vec3f e;
 };
 
 }

@@ -20,9 +20,12 @@ public:
     }
 
     UniformSampler(uint64 seed, uint64 sequence = 0)
-    : _state(seed),
-      _sequence(sequence)
     {
+        _state = 0u;
+        _sequence = (sequence << 1u) | 1u;
+        nextI();
+        _state += seed;
+        nextI();
     }
 
     void saveState(OutputStreamHandle &out)
@@ -56,6 +59,14 @@ public:
         float a = next1D();
         float b = next1D();
         return Vec2f(a, b);
+    }
+
+    inline Vec3f next3D()
+    {
+        float a = next1D();
+        float b = next1D();
+        float c = next1D();
+        return Vec3f(a, b, c);
     }
 
     uint64 state() const
